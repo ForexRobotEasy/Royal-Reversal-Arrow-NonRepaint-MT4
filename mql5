@@ -1,0 +1,92 @@
+mql5
+//+------------------------------------------------------------------+
+//|                            Royal Reversal Arrow NonRepaint MT4    |
+//|                                forexroboteasy.com                 |
+//|                            Developed by Forex Robot Easy Team     |
+//+------------------------------------------------------------------+
+#property strict
+
+// Global variables
+int ExtIndicatorPeriod = 14;
+double ExtFilterThreshold = 0.5;
+
+//+------------------------------------------------------------------+
+//| Custom indicator initialization function                         |
+//+------------------------------------------------------------------+
+int OnInit()
+{
+    // Set the necessary parameters
+    IndicatorSetInteger(INDICATOR_DIGITS, _Digits);
+    IndicatorSetInteger(INDICATOR_BUFFERS, 1);
+    IndicatorSetString(INDICATOR_SHORTNAME, 'Royal Reversal Arrow');
+    
+    // Set the necessary variables and arrays
+    ArrayInitialize(Buffer, 0);
+    
+    return(INIT_SUCCEEDED);
+}
+
+//+------------------------------------------------------------------+
+//| Custom indicator iteration function                              |
+//+------------------------------------------------------------------+
+int OnCalculate(const int rates_total, const int prev_calculated, const datetime &time[], const double &open[],
+                const double &high[], const double &low[], const double &close[], const long &tick_volume[],
+                const long &volume[], const int &spread[])
+{
+    int limit = MathMax(prev_calculated - 1, 0);
+    
+    // Loop through the candles
+    for (int i = limit; i < rates_total; i++)
+    {
+        // Calculate the momentum
+        double momentum = CalculateMomentum(i);
+        
+        // Check if the momentum exceeds the filter threshold
+        if (momentum > ExtFilterThreshold)
+        {
+            // Generate an arrow on the chart
+            GenerateArrowOnChart(i);
+        }
+    }
+    
+    return(rates_total);
+}
+
+//+------------------------------------------------------------------+
+//| Calculate momentum function                                      |
+//+------------------------------------------------------------------+
+double CalculateMomentum(const int index)
+{
+    // Calculate the momentum based on the indicator period
+    double momentum = (close[index] - close[index - ExtIndicatorPeriod]) / ExtIndicatorPeriod;
+    
+    return(momentum);
+}
+
+//+------------------------------------------------------------------+
+//| Generate arrow on chart function                                 |
+//+------------------------------------------------------------------+
+void GenerateArrowOnChart(const int index)
+{
+    // Check if the arrow has already been generated
+    if (Buffer[index] == 0)
+    {
+        // Generate arrow on the chart
+        Buffer[index] = 1;
+    }
+}
+
+//+------------------------------------------------------------------+
+//| Custom indicator deinitialization function                       |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+{
+    // Clean up and free resources
+    ArrayFree(Buffer);
+}
+
+//+------------------------------------------------------------------+
+//| Global variables                                                  |
+//+------------------------------------------------------------------+
+double Buffer[];
+
